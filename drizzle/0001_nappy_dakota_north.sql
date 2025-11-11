@@ -1,0 +1,1 @@
+ALTER TABLE `schedule` ADD `timestamp` text NOT NULL;
