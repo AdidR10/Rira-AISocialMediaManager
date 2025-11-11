@@ -65,7 +65,18 @@ export const getPhotocardTools = async (user: User) => {
         }
     })
 
+    const getLast5Photocards = tool({
+        description: "Retrieve the 5 most recent photocards created by the user.",
+        inputSchema: z.object(),
+        execute: async () => {
+            const last5Photocards = await db.select({
+                photocardUrl: photocardTable.url,
+                photocardId: photocardTable.id
+            }).from(photocardTable).where(eq(photocardTable.userId, user.id)).orderBy(desc(photocardTable.createdAt)).limit(5)
+            return last5Photocards
+        }
+    })
     
 
-    return { createPhotocard}
+    return { createPhotocard, getLast5Photocards}
 }
