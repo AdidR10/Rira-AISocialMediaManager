@@ -65,6 +65,55 @@ export const getPhotocardTools = async (user: User) => {
         }
     })
 
+    const editPhotocard = tool({
+        description: "Edit an existing photocard based on user feedback.",
+        inputSchema: z.object({
+            prompt: z.string().describe("Specific editing instructions from the user."),
+            photocardId: z.string().describe("ID of the photocard to edit.")
+        }),
+        execute: async ({ prompt, photocardId }) => {
+            const [oldPhotocard] = await db.select().from(photocardTable).where(eq(photocardTable.id, photocardId)).limit(1)
+
+            const { object } = await generateObject({
+                model: gemini('gemini-2.5-flash'),
+                schema: z.object({
+                    html: z.string(),
+                    height: z.number(),
+                    width: z.number()
+                }),
+                system: photocardEditSystemInstructions,
+                prompt: `${prompt}\n\nHere's the existing data:\n${JSON.stringify(oldPhotocard, null, 2)}`,
+            });
+
+            const filename = `${getRandomId()}.png`
+            const uploadDir = path.join(process.cwd(), 'images', 'photocards');
+            const filePath = path.join(uploadDir, filename);
+
+            await fs.promises.mkdir(uploadDir, { recursive: true });
+
+            await nodeHtmlToImage({
+                output: filePath,
+                puppeteerArgs: {
+                    executablePath: PUPPETEER_EXEC_PATH
+                },
+                html: object.html,
+            })
+
+            const [photocard] = await db.insert(photocardTable).values({
+                html: object.html,
+                url: `${BETTER_AUTH_URL}/api/files/photocards/${filename}`,
+                height: object.height,
+                width: object.width,
+                userId: user.id
+            }).returning()
+
+            return {
+                newPhotocardUrl: `${BETTER_AUTH_URL}/api/files/photocards/${filename}`,
+                newPhotocardId: photocard.id
+            }
+        }
+    })
+
     const getLast5Photocards = tool({
         description: "Retrieve the 5 most recent photocards created by the user.",
         inputSchema: z.object(),
@@ -78,5 +127,5 @@ export const getPhotocardTools = async (user: User) => {
     })
     
 
-    return { createPhotocard, getLast5Photocards}
+    return { createPhotocard, getLast5Photocards, editPhotocard}
 }
