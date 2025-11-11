@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1762208829753,
+      "tag": "0000_stiff_diamondback",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1762208849238,
+      "tag": "0001_nappy_dakota_north",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1762347825000,
+      "tag": "0002_fresh_marten_broadcloak",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1762405375066,
+      "tag": "0003_classy_forge",
+      "breakpoints": true
+    }
+  ]
+}
